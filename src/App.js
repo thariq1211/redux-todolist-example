@@ -12,6 +12,7 @@ import {
   FormGroup,
   TextField,
   Button,
+  Snackbar,
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 
@@ -33,10 +34,16 @@ const connectedApp = connect(
 )(App);
 
 function App({ todos, addTodos, deleteTodos }) {
-  const [todo, setTodo] = useState();
+  const [todo, setTodo] = useState("");
+  const [toast, setToast] = useState(false);
   const addTodosEv = (value) => {
-    setTodo("");
-    addTodos(value);
+    if (todo !== "") {
+      setTodo("");
+      addTodos(value);
+    } else {
+      setToast(true);
+      setTimeout(() => setToast(false), 3000);
+    }
   };
   return (
     <Container maxWidth="md">
@@ -46,6 +53,12 @@ function App({ todos, addTodos, deleteTodos }) {
       <Divider />
       <FormGroup>
         <Grid container spacing="2">
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            open={toast}
+            message="Input Todo Properly!"
+            key={`bottom + center`}
+          />
           <Grid item xs="12" md="10">
             <TextField
               fullWidth
