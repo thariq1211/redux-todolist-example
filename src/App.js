@@ -1,26 +1,88 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, memo } from "react";
+import { connect } from "react-redux";
+import actions from "./reducers/actions";
+import {
+  Container,
+  Grid,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  FormGroup,
+  TextField,
+  Button,
+} from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/DeleteOutline";
 
-function App() {
+const connectedApp = connect(
+  (state) => {
+    return {
+      state,
+      todos: state.todos,
+    };
+  },
+  (dispatch) => {
+    return {
+      addTodos: (value) =>
+        dispatch({ type: actions.ADD_TODOS, payload: value }),
+      deleteTodos: (key) =>
+        dispatch({ type: actions.DELETE_TODOS, payload: key }),
+    };
+  }
+)(App);
+
+function App({ todos, addTodos, deleteTodos }) {
+  const [todo, setTodo] = useState();
+  const addTodosEv = (value) => {
+    setTodo("");
+    addTodos(value);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container maxWidth="md">
+      <center>
+        <h1>TODO List</h1>
+      </center>
+      <Divider />
+      <FormGroup>
+        <Grid container spacing="2">
+          <Grid item xs="12" md="10">
+            <TextField
+              fullWidth
+              placeholder="Add Todos"
+              value={todo}
+              onChange={(el) => setTodo(el.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addTodosEv(todo)}
+            />
+          </Grid>
+          <Grid item xs="12" md="2">
+            <Button
+              fullWidth
+              variant="outlined"
+              color="primary"
+              onClick={() => addTodosEv(todo)}
+            >
+              Add
+            </Button>
+          </Grid>
+          <Grid item xs="12" md="12">
+            <List dense>
+              {todos.length !== 0
+                ? todos.map((item) => (
+                    <ListItem key={item.id}>
+                      <ListItemText>{item.todo}</ListItemText>
+                      <ListItemSecondaryAction>
+                        <DeleteIcon onClick={() => deleteTodos(item.id)} />
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))
+                : "Todolist is Empty!"}
+            </List>
+          </Grid>
+        </Grid>
+      </FormGroup>
+    </Container>
   );
 }
 
-export default App;
+export default memo(connectedApp);
