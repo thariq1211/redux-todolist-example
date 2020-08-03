@@ -50,7 +50,6 @@ function App({ todos, addTodos, deleteTodos }) {
       <center>
         <h1>TODO List</h1>
       </center>
-      <Divider />
       <FormGroup>
         <Grid container spacing="2">
           <Snackbar
