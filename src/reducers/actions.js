@@ -1,5 +1,0 @@
-export default {
-  ADD_TODOS: "ADD_TODOS",
-  EDIT_TODOS: "EDIT_TODOS",
-  DELETE_TODOS: "DELETE_TODOS",
-};
