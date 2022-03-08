@@ -12,12 +12,14 @@ const pushStorage = (value) => {
 
 const reducer = (state = initialStore, action) => {
   switch (action.type) {
-    case actions.ADD_TODOS:
+    case actions.INIT_TODO:
+      return { ...state, todolist: action.payload };
+    case actions.ADD_TODO:
       return pushStorage({
         ...state,
         todos: [...state.todos, { id: getRandomInt(), todo: action.payload }],
       });
-    case actions.EDIT_TODOS:
+    case actions.EDIT_TODO:
       const currentState = state.todos;
       const payload = action.payload;
       const newState = currentState.map((item) => {
@@ -26,7 +28,7 @@ const reducer = (state = initialStore, action) => {
           : item;
       });
       return pushStorage({ ...state, todos: newState });
-    case actions.DELETE_TODOS:
+    case actions.DELETE_TODO:
       const deleteTodos = {
         ...state,
         todos: state.todos.filter((e) => e.id !== action.payload),
