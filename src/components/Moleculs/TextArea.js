@@ -2,10 +2,16 @@ import React from "react";
 import { TextareaAutosize } from "@material-ui/core";
 
 export default function TextArea(props) {
+	const styles = {
+		width: "99%",
+		borderRadius: "5px",
+		borderColor: "gray",
+		padding: "5px" 
+	}
 	return (
 		<TextareaAutosize
-      style={{ width: "100%", border: "1px solid #757575" }}
-			minRows={3}
+      style={styles}
+			minRows={4}
 			placeholder="input description"
 			onChange={props.onChange}
 			defaultValue={props.defaultValue}

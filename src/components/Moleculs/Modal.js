@@ -8,7 +8,7 @@ export default function ModalComponent({children, open, onClose, title}) {
       position: "absolute",
       marginLeft: "20vw",
       marginRight: "20vw",
-      top: "40%",
+      top: "35%",
       left: "0",
       right: "0"
     }

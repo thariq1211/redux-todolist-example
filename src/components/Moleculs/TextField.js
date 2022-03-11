@@ -9,6 +9,7 @@ export default function TextFieldComponent(props) {
       onChange={props.onChange}
       placeholder={props.placeholder} 
       variant="outlined"
+      {...props}
     ></TextField>
   )
 }

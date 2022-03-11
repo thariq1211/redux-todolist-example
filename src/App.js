@@ -1,212 +1,219 @@
 import React, { useState, memo, useEffect } from "react";
-import moment from "moment";
 import { connect } from "react-redux";
 import actions from "./reducers/actions";
 import {
-  Container,
-  Grid,
-  List,
-  ListItem,
-  ListItemSecondaryAction,
-  FormGroup,
-  Button,
-  Snackbar,
-  TextField
+	Container,
+	Grid,
+	List,
+	ListItem,
+	FormGroup,
+	Button,
+	Snackbar,
+	Typography,
 } from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/DeleteOutline";
-import EditIcon from "@material-ui/icons/Edit";
 
 import TodoField from "./components/Moleculs/ListTodo";
 import Modal from "./components/Moleculs/Modal";
-import DetailTodo from "./components/DetailTodo";
+import ModalTodo from "./components/ModalTodo";
 
 const connectedApp = connect(
-  (state) => {
-    return {
-      state,
-      todos: state?.todos,
-      todolist: state?.todolist
-    };
-  },
-  (dispatch) => {
-    return {
-      initTodo: (value) => 
-        dispatch({ type: actions.INIT_TODO, payload: value }),
-      addTodos: (value) =>
-        dispatch({ type: actions.ADD_TODO, payload: value }),
-      deleteTodos: (key) =>
-        dispatch({ type: actions.DELETE_TODO, payload: key }),
-      editTodos: (key, value) =>
-        dispatch({ type: actions.EDIT_TODO, payload: { key, value } }),
-    };
-  }
+	(state) => {
+		return {
+			state,
+			todolist: state?.todolist,
+		};
+	},
+	(dispatch) => {
+		return {
+			initTodo: (value) =>
+				dispatch({ type: actions.INIT_TODO, payload: value }),
+			addTodo: (value) => dispatch({ type: actions.ADD_TODO, payload: value }),
+			deleteTodo: (key) =>
+				dispatch({ type: actions.DELETE_TODO, payload: key }),
+			editTodo: (key, value) =>
+				dispatch({
+					type: actions.EDIT_TODO,
+					payload: { key, title: value.title, description: value.description },
+				}),
+			markDone: (key) => dispatch({ type: actions.MARK_DONE, payload: key }),
+		};
+	}
 )(App);
 
-function App({ todolist, todos, initTodo, addTodos, deleteTodos, editTodos }) {
-  const [todo, setTodo] = useState("");
-  const [toast, setToast] = useState(false);
-  const [isEdit, setIsEdit] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
-  const addTodosEv = (value) => {
-    if (todo !== "") {
-      setTodo("");
-      addTodos(value);
-    } else {
-      setToast(true);
-      setTimeout(() => setToast(false), 3000);
-    }
-  };
+function App(props) {
+	const { todolist, initTodo, addTodo, deleteTodo, editTodo, markDone } = props;
+	const [toast, setToast] = useState(false);
+	const [openEditModal, setOpenEditModal] = useState(false);
+	const [openAddModal, setOpenAddModal] = useState(false);
+	const [editData, setEditData] = useState({});
 
-  const timestamp = () => {
-    return moment().format("YYYY-MM-DD HH:MM")
-  };
+	const ondeletebutton = () => {
+		deleteTodo(editData.id);
+    console.log("terpanggil")
+		onCloseEditModal();
+	};
 
-  console.log(todolist);
+	const onmarkdone = () => {
+		markDone(editData.id);
+		onCloseEditModal();
+	};
 
-  useEffect(() => {
-    fetch("https://virtserver.swaggerhub.com/hanabyan/todo/1.0.0/to-do-list", {
-      method: "GET"
-    })
-    .then(result => result.json())
-    .then(response => initTodo(response))
-    .catch(ex => console.error(ex))
-  }, []);
+	const onsavemodaledit = (value) => {
+		editTodo(editData.id, {
+			title: value.title,
+			description: value.description,
+		});
+    onCloseEditModal();
+	};
 
-  useEffect(() => {
-    setIsEdit(todos?.map((item) => ({ id: item.id, status: false })));
-  }, [todos]);
+	const onsavemodaladd = (value) => {
+		if (value.description !== "" && value.title !== "") {
+			addTodo(value);
+			setOpenAddModal((prev) => !prev);
+		} else {
+			setToast(true);
+			setTimeout(() => setToast(false), 3000);
+		}
+	};
 
-  console.log(todolist);
+	const onOpenEditModal = (item) => {
+		return (ev) => {
+			setOpenEditModal((prev) => !prev);
+			setEditData(item);
+		};
+	};
 
-  return (
-    <Container maxWidth="md">
-      <Modal title={"Edit Todo"} open={openModal} onClose={() => setOpenModal(prev => !prev)}>
-        <DetailTodo title={"ini title"} description={"ini description"} />
-      </Modal>
-      <center>
-        <h2>TODO List</h2>
-      </center>
-      <FormGroup>
-        <Grid container spacing={2}>
-          <Snackbar
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            open={toast}
-            message="Input Todo Properly!"
-            key={`bottom + center`}
-          />
-          <Grid item xs={12} md={10}>
-            <TextField
-              fullWidth
-              placeholder="Add Todo"
-              value={todo}
-              onChange={(el) => setTodo(el.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addTodosEv(todo)}
-            />
-          </Grid>
-          <Grid item xs={12} md={2}>
-            <Button
-              fullWidth
-              variant="outlined"
-              color="primary"
-              onClick={() => addTodosEv(todo)}
-            >
-              Add
-            </Button>
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <List dense>
-              {todolist
-                ? todolist?.filter(e => e.status === 0).map((item) => (
-                    <ListItem key={item.id}>
-                      <TodoField
-                        onClick={() => setOpenModal(prev => !prev)}
-                        status={item.status}
-                        disabled={
-                          !isEdit.filter((i) => i.id === item.id)[0]?.status
-                        }
-                        title={item.title}
-                        description={item.description}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            editTodos(item.id, e.target.value);
-                            setIsEdit((prevEdit) =>
-                              prevEdit.map((val) => {
-                                return val.id === item.id
-                                  ? { ...val, status: !val.status }
-                                  : val;
-                              })
-                            );
-                          }
-                        }}
-                      ></TodoField>
-                      {/* <ListItemSecondaryAction>
-                        <EditIcon
-                          onClick={() =>
-                            setIsEdit((prevEdit) =>
-                              prevEdit.map((val) => {
-                                return val.id === item.id
-                                  ? { ...val, status: !val.status }
-                                  : val;
-                              })
-                            )
-                          }
-                        />
-                        <DeleteIcon onClick={() => deleteTodos(item.id)} />
-                      </ListItemSecondaryAction> */}
-                    </ListItem>
-                  ))
-                : "Todolist is Empty!"}
-            </List>
-          </Grid>
-          <Grid item xs={12} md={12}>
-            <List dense>
-              {todolist
-                ? todolist?.filter(e => e.status !== 0).map((item) => (
-                    <ListItem key={item.id}>
-                      <TodoField
-                        onClick={() => setOpenModal(prev => !prev)}
-                        status={item.status}
-                        disabled={
-                          !isEdit.filter((i) => i.id === item.id)[0]?.status
-                        }
-                        title={item.title}
-                        description={item.description}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            editTodos(item.id, e.target.value);
-                            setIsEdit((prevEdit) =>
-                              prevEdit.map((val) => {
-                                return val.id === item.id
-                                  ? { ...val, status: !val.status }
-                                  : val;
-                              })
-                            );
-                          }
-                        }}
-                      ></TodoField>
-                      {/* <ListItemSecondaryAction>
-                        <EditIcon
-                          onClick={() =>
-                            setIsEdit((prevEdit) =>
-                              prevEdit.map((val) => {
-                                return val.id === item.id
-                                  ? { ...val, status: !val.status }
-                                  : val;
-                              })
-                            )
-                          }
-                        />
-                        <DeleteIcon onClick={() => deleteTodos(item.id)} />
-                      </ListItemSecondaryAction> */}
-                    </ListItem>
-                  ))
-                : "Todolist done is Empty!"}
-            </List>
-          </Grid>
-        </Grid>
-      </FormGroup>
-    </Container>
-  );
+	const onCloseEditModal = () => {
+		setOpenEditModal((prev) => !prev);
+		setEditData({});
+	};
+
+	const onOpenAddModal = () => {
+		setOpenAddModal((prev) => !prev);
+	};
+
+	const onCloseAddModal = () => {
+		setOpenAddModal((prev) => !prev);
+	};
+
+	const sortTaskUnDone = () => {
+		const todolistundone = todolist.filter((item) => item.status === 0);
+		const convertdate = todolistundone.map((item) => ({
+			...item,
+			createdAt: new Date(item.createdAt),
+		}));
+		const sort = convertdate.sort((a, b) => a.createdAt - b.createdAt);
+		return sort;
+	};
+
+	const sortTaskDone = () => {
+		const todolistdone = todolist.filter((item) => item.status === 1);
+		const convertdate = todolistdone.map((item) => ({
+			...item,
+			createdAt: new Date(item.createdAt),
+		}));
+		const sort = convertdate.sort((a, b) => b.createdAt - a.createdAt);
+		return sort;
+	};
+
+	useEffect(() => {
+		const intializefetchAPI = async () => {
+			try {
+				const url =
+					"https://virtserver.swaggerhub.com/hanabyan/todo/1.0.0/to-do-list";
+				const request = await fetch(url, {
+					method: "GET",
+				});
+				const response = await request.json();
+				initTodo(response);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		intializefetchAPI();
+	}, []);
+
+	return (
+		<Container maxWidth="md">
+			<Modal title="Edit Todo" open={openEditModal} onClose={onCloseEditModal}>
+				<ModalTodo
+					ondelete={ondeletebutton}
+					ondone={onmarkdone}
+					onsave={onsavemodaledit}
+					mode="edit"
+					title={editData.title}
+					description={editData.description}
+					status={editData.status}
+				/>
+			</Modal>
+			<Modal title="Add Todo" open={openAddModal} onClose={onCloseAddModal}>
+				<ModalTodo
+					onsave={onsavemodaladd}
+					mode="add"
+					title={editData.title}
+					description={editData.description}
+					status={editData.status}
+				/>
+			</Modal>
+			<center>
+				<Typography variant="h4">Todo-list App</Typography>
+			</center>
+			<FormGroup>
+				<Grid container spacing={2}>
+					<Snackbar
+						anchorOrigin={{ vertical: "top", horizontal: "right" }}
+						open={toast}
+						message="Input Todo Properly!"
+						key={`bottom + center`}
+					/>
+					<Grid item xs={12} md={12}>
+						<Button
+							fullWidth
+							variant="outlined"
+							color="primary"
+							onClick={onOpenAddModal}
+						>
+							Add
+						</Button>
+					</Grid>
+					<Grid item xs={12} md={12}>
+						<Typography variant="body1">Task undone</Typography>
+						<List dense>
+							{sortTaskUnDone().length > 0
+								? sortTaskUnDone().map((item) => (
+										<ListItem key={item.id}>
+											<TodoField
+												onClick={onOpenEditModal(item)}
+												status={item.status}
+												title={item.title}
+												description={item.description}
+											></TodoField>
+										</ListItem>
+								  ))
+								: "Todolist is Empty!"}
+						</List>
+					</Grid>
+					<Grid item xs={12} md={12}>
+						<Typography variant="body1">Task done</Typography>
+						<List dense>
+							{sortTaskDone()?.length > 0
+								? sortTaskDone().map((item) => (
+										<ListItem key={item.id}>
+											<TodoField
+												onClick={onOpenEditModal(item)}
+												status={item.status}
+												title={item.title}
+												description={item.description}
+											></TodoField>
+										</ListItem>
+								  ))
+								: "Todolist done is Empty!"}
+						</List>
+					</Grid>
+				</Grid>
+			</FormGroup>
+		</Container>
+	);
 }
 
 export default memo(connectedApp);

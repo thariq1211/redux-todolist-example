@@ -29,7 +29,7 @@ export default function ListTodo({status, title, description, onClick}) {
             style={style.todoContent} 
             color="textSecondary" 
             component="p" 
-            variant="p"
+            variant="caption"
           >{description}</Typography>
         </CardContent>
       </Card>
