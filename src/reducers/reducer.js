@@ -9,6 +9,7 @@ const getRandomInt = () => {
 const timestamp = () => {
 	return moment().format("YYYY-MM-DD HH:MM");
 };
+
 const pushStorage = (value) => {
 	localStorage.setItem("todos", JSON.stringify(value));
 	return value;

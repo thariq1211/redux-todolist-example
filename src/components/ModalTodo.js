@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
 import { Grid, Button } from "@material-ui/core";
-import Textfield from "./Moleculs/TextField";
-import TextArea from "./Moleculs/TextArea";
+import Textfield from "./moleculs/TextField";
+import TextArea from "./moleculs/TextArea";
 import DeleteIcon from "@material-ui/icons/DeleteOutline";
 import SaveIcon from "@material-ui/icons/Save";
 import MarkIcon from "@material-ui/icons/Done";
@@ -46,8 +46,8 @@ export default function DetailTodo({
 		} else {
 			const data = {
 				title: todo.title === "" ? title : todo.title,
-				description: todo.description === "" ? description: todo.description
-			}
+				description: todo.description === "" ? description : todo.description,
+			};
 			onsave(data);
 		}
 	};
@@ -60,7 +60,7 @@ export default function DetailTodo({
 		<Grid
 			container
 			direction="column"
-			justifyContent="flex-start"
+			justify="flex-start"
 			alignItems="flex-start"
 		>
 			<Grid md={11} style={styles.grid}>
@@ -82,7 +82,7 @@ export default function DetailTodo({
 				style={styles.grid}
 				container
 				direction="row"
-				justifyContent="flex-start"
+				justify="flex-start"
 				alignItems="flex-start"
 			>
 				<Grid md={3} style={styles.button}>

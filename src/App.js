@@ -1,26 +1,26 @@
-import React, { useState, memo, useEffect } from "react";
+import "./App.css";
 import { connect } from "react-redux";
-import actions from "./reducers/actions";
+import { useEffect, useState } from "react";
 import {
 	Container,
+	Typography,
+	FormGroup,
 	Grid,
 	List,
 	ListItem,
-	FormGroup,
-	Button,
 	Snackbar,
-	Typography,
+	Button,
 } from "@material-ui/core";
 
-import TodoField from "./components/Moleculs/ListTodo";
-import Modal from "./components/Moleculs/Modal";
+import actions from "./reducers/actions";
+import TodoField from "./components/moleculs/ListTodo";
+import Modal from "./components/moleculs/Modal";
 import ModalTodo from "./components/ModalTodo";
 
-const connectedApp = connect(
+const connectApp = connect(
 	(state) => {
 		return {
 			state,
-			todolist: state?.todolist,
 		};
 	},
 	(dispatch) => {
@@ -30,40 +30,30 @@ const connectedApp = connect(
 			addTodo: (value) => dispatch({ type: actions.ADD_TODO, payload: value }),
 			deleteTodo: (key) =>
 				dispatch({ type: actions.DELETE_TODO, payload: key }),
+			markDone: (key) => dispatch({ type: actions.MARK_DONE, payload: key }),
 			editTodo: (key, value) =>
 				dispatch({
 					type: actions.EDIT_TODO,
 					payload: { key, title: value.title, description: value.description },
 				}),
-			markDone: (key) => dispatch({ type: actions.MARK_DONE, payload: key }),
 		};
 	}
-)(App);
+);
 
 function App(props) {
-	const { todolist, initTodo, addTodo, deleteTodo, editTodo, markDone } = props;
-	const [toast, setToast] = useState(false);
-	const [openEditModal, setOpenEditModal] = useState(false);
+	const { state, addTodo, initTodo, deleteTodo, markDone, editTodo } = props;
+	const { todolist } = state;
 	const [openAddModal, setOpenAddModal] = useState(false);
+	const [openEditModal, setOpenEditModal] = useState(false);
 	const [editData, setEditData] = useState({});
+	const [toast, setToast] = useState(false);
 
-	const ondeletebutton = () => {
-		deleteTodo(editData.id);
-    console.log("terpanggil")
-		onCloseEditModal();
+	const onCloseAddModal = () => {
+		setOpenAddModal((prev) => !prev);
 	};
 
-	const onmarkdone = () => {
-		markDone(editData.id);
-		onCloseEditModal();
-	};
-
-	const onsavemodaledit = (value) => {
-		editTodo(editData.id, {
-			title: value.title,
-			description: value.description,
-		});
-    onCloseEditModal();
+	const onOpenAddModal = () => {
+		setOpenAddModal((prev) => !prev);
 	};
 
 	const onsavemodaladd = (value) => {
@@ -88,12 +78,22 @@ function App(props) {
 		setEditData({});
 	};
 
-	const onOpenAddModal = () => {
-		setOpenAddModal((prev) => !prev);
+	const ondeletebutton = () => {
+		deleteTodo(editData.id);
+		onCloseEditModal();
 	};
 
-	const onCloseAddModal = () => {
-		setOpenAddModal((prev) => !prev);
+	const onmarkdone = () => {
+		markDone(editData.id);
+		onCloseEditModal();
+	};
+
+	const onsavemodaledit = (value) => {
+		editTodo(editData.id, {
+			title: value.title,
+			description: value.description,
+		});
+		onCloseEditModal();
 	};
 
 	const sortTaskUnDone = () => {
@@ -137,23 +137,17 @@ function App(props) {
 		<Container maxWidth="md">
 			<Modal title="Edit Todo" open={openEditModal} onClose={onCloseEditModal}>
 				<ModalTodo
+					mode="edit"
 					ondelete={ondeletebutton}
 					ondone={onmarkdone}
 					onsave={onsavemodaledit}
-					mode="edit"
 					title={editData.title}
 					description={editData.description}
 					status={editData.status}
 				/>
 			</Modal>
 			<Modal title="Add Todo" open={openAddModal} onClose={onCloseAddModal}>
-				<ModalTodo
-					onsave={onsavemodaladd}
-					mode="add"
-					title={editData.title}
-					description={editData.description}
-					status={editData.status}
-				/>
+				<ModalTodo onsave={onsavemodaladd} mode="add" />
 			</Modal>
 			<center>
 				<Typography variant="h4">Todo-list App</Typography>
@@ -216,4 +210,4 @@ function App(props) {
 	);
 }
 
-export default memo(connectedApp);
+export default connectApp(App);

@@ -1,3 +1,5 @@
-export default {
-	todolist: [],
+const initialStore = {
+  todolist: []
 };
+
+export default initialStore;

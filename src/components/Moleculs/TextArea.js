@@ -6,12 +6,12 @@ export default function TextArea(props) {
 		width: "99%",
 		borderRadius: "5px",
 		borderColor: "gray",
-		padding: "5px" 
-	}
+		padding: "5px",
+	};
 	return (
 		<TextareaAutosize
-      style={styles}
-			minRows={4}
+			style={styles}
+			rowsMin={4}
 			placeholder="input description"
 			onChange={props.onChange}
 			defaultValue={props.defaultValue}
